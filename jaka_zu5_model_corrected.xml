@@ -1,0 +1,264 @@
+<mujoco model="jaka_zu5">
+  <!-- ============================================================ -->
+  <!-- 质量参数修正说明                                                -->
+  <!-- 修正日期: 2026-07-13 19:44:51                   -->
+  <!-- 修正原因: URDF 总质量 96.39 kg, 官方规格 23.00 kg  -->
+  <!-- 偏差分析: 绝对偏差 +73.39 kg, 相对偏差 +319.1%   -->
+  <!-- 修正方法: 均匀缩放, 因子 k = 0.238605                 -->
+  <!-- 缩放对象: 所有连杆 mass 与 fullinertia (质心位置 pos 不变)      -->
+  <!-- 生成脚本: fix_mass_parameters.py                               -->
+  <!-- ============================================================ -->
+  <!-- ============================================================ -->
+  <!-- 编译器配置                                                    -->
+  <!-- URDF 来源: JakaCobot/jaka_ros2 (src/jaka_description/urdf/) -->
+  <!-- STL 单位: 米 (m)，无需 scale 转换                            -->
+  <!-- ============================================================ -->
+  <compiler
+    angle="radian"
+    meshdir="meshes/"
+    inertiafromgeom="false"
+    autolimits="true"
+  />
+
+  <!-- ============================================================ -->
+  <!-- 物理选项                                                      -->
+  <!-- ============================================================ -->
+  <option
+    timestep="0.002"
+    integrator="implicitfast"
+    gravity="0 0 -9.81"
+    iterations="50"
+    ls_iterations="20"
+  >
+    <!-- ====================================================== -->
+    <!-- 关闭重力选项 (布尔值配置)                                -->
+    <!--   gravity="enable"  → 重力开启 (关闭重力 = false)       -->
+    <!--   gravity="disable" → 重力关闭 (关闭重力 = true)        -->
+    <!--   关闭时运行时将 gravity 替换为 (0,0,0)，不改变原值      -->
+    <!--   重新启用后自动恢复 gravity 属性值                      -->
+    <!-- ====================================================== -->
+    <flag gravity="disable" />
+  </option>
+
+  <!-- ============================================================ -->
+  <!-- 尺寸配置                                                      -->
+  <!-- ============================================================ -->
+  <size nuser_body="0" nuser_geom="0" />
+
+  <!-- ============================================================ -->
+  <!-- 默认配置                                                      -->
+  <!-- ============================================================ -->
+  <default>
+    <geom
+      condim="3"
+      friction="0.5 0.1 0.1"
+      solref="0.01 1"
+      solimp="0.9 0.95 0.001"
+      margin="0.0001"
+    />
+    <!-- damping=0.5 为默认回退值，各关节在 <joint> 元素上单独覆盖 -->
+    <joint armature="0.01" damping="0.5" />
+    <site size="0.01" />
+  </default>
+
+  <!-- ============================================================ -->
+  <!-- 资产：网格与材质                                              -->
+  <!-- mesh 文件名大小写与实际 STL 文件一致 (Linux 区分大小写)      -->
+  <!-- ============================================================ -->
+  <asset>
+    <mesh name="Link_0_mesh" file="Link_0.STL" />
+    <mesh name="Link_1_mesh" file="Link_1.STL" />
+    <mesh name="Link_2_mesh" file="Link_2.STL" />
+    <mesh name="Link_3_mesh" file="Link_3.STL" />
+    <mesh name="Link_4_mesh" file="Link_4.STL" />
+    <mesh name="Link_5_mesh" file="Link_5.STL" />
+    <mesh name="Link_6_mesh" file="Link_6.STL" />
+
+    <material name="link_grey" rgba="0.847 0.847 0.847 1" specular="0.5" shininess="0.3" />
+    <material name="base_dark" rgba="0.3 0.3 0.3 1" specular="0.5" shininess="0.3" />
+    <material name="ref_mat" rgba="1.0 0.0 0.0 0.5" />
+  </asset>
+
+  <!-- ============================================================ -->
+  <!-- 世界体                                                        -->
+  <!-- 坐标系: 基座中心在地面上方, Z 向上                           -->
+  <!-- ============================================================ -->
+  <worldbody>
+    <!-- 光照 -->
+    <light name="top_light" pos="0.5 0 2.0" dir="0 0 -1" diffuse="0.8 0.8 0.8" />
+    <light name="side_light" pos="2.0 2.0 1.5" dir="-1 -1 -0.5" diffuse="0.4 0.4 0.4" />
+
+    <!-- 相机 -->
+    <camera name="front_view" pos="1.5 0 1.0" quat="0.9 0 0.4 0" />
+    <camera name="side_view" pos="0 1.5 1.0" quat="0.9 -0.4 0 0" />
+    <camera name="top_view" pos="0.5 0 2.0" quat="1 0 0 0" />
+
+    <!-- 地面 (仅可视化, 不参与碰撞) -->
+    <geom name="floor" type="plane" pos="0 0 -0.05" size="3 3 0.01"
+          rgba="0.8 0.8 0.8 0.2" contype="0" conaffinity="0" />
+
+    <!-- ====== Link_0 (基座) —— 固定到世界 ====== -->
+    <body name="Link_0" pos="0 0 0" quat="1 0 0 0">
+      <inertial pos="0.00096371 8.8222e-08 0.019555" mass="0.963775"
+                fullinertia="1.163511e-03 1.622588e-03 2.533511e-03 -4.308257e-08 6.011899e-06 -4.218064e-10" />
+      <geom name="Link_0_geom" type="mesh" mesh="Link_0_mesh" material="base_dark"
+            group="0" contype="1" conaffinity="1" />
+      <site name="base_ref" pos="0 0 0" size="0.01" material="ref_mat" />
+
+      <!-- ====== Link_1 —— joint_1 (J1, 基座旋转) ====== -->
+      <!-- origin: xyz=(0 0 0.12015) rpy=(0 0 0), axis=Z, range=±6.28 rad (±360°) -->
+      <body name="Link_1" pos="0 0 0.12015" quat="1 0 0 0">
+        <inertial pos="-2.5186e-07 0.0033226 -0.001509" mass="3.611291"
+                  fullinertia="1.057069e-02 1.028174e-02 7.282950e-03 3.662353e-08 -1.478542e-07 3.418260e-06" />
+        <joint name="joint_1" type="hinge" pos="0 0 0" axis="0 0 1"
+               range="-6.28 6.28" limited="true" damping="1.5" />
+        <geom name="Link_1_geom" type="mesh" mesh="Link_1_mesh" material="link_grey"
+              group="0" contype="1" conaffinity="1" />
+
+        <!-- ====== Link_2 —— joint_2 (J2, 肩部) ====== -->
+        <!-- origin: xyz=(0 0 0) rpy=(1.5708 0 0), axis=Z, range=-1.48~4.62 rad -->
+        <!-- rpy=(π/2,0,0) → quat=(cos(π/4), sin(π/4), 0, 0)=(0.7071, 0.7071, 0, 0) -->
+        <body name="Link_2" pos="0 0 0" quat="0.7071 0.7071 0 0">
+          <inertial pos="0.215 6.4325e-09 -0.14315" mass="10.939337"
+                    fullinertia="2.476007e-02 3.809095e-01 3.743479e-01 -3.235965e-07 6.070119e-08 5.132161e-09" />
+          <joint name="joint_2" type="hinge" pos="0 0 0" axis="0 0 1"
+                 range="-1.48 4.62" limited="true" damping="2.0" />
+          <geom name="Link_2_geom" type="mesh" mesh="Link_2_mesh" material="link_grey"
+                group="0" contype="1" conaffinity="1" />
+
+          <!-- ====== Link_3 —— joint_3 (J3, 肘部) ====== -->
+          <!-- origin: xyz=(0.43 0 0) rpy=(0 0 0), axis=Z, range=±3.05 rad (±175°) -->
+          <body name="Link_3" pos="0.43 0 0" quat="1 0 0 0">
+            <inertial pos="0.19087 -1.1862e-05 -0.010587" mass="4.311359"
+                      fullinertia="5.265065e-03 9.933616e-02 9.799758e-02 -8.244768e-07 -5.394627e-03 2.745870e-09" />
+            <joint name="joint_3" type="hinge" pos="0 0 0" axis="0 0 1"
+                   range="-3.05 3.05" limited="true" damping="1.2" />
+            <geom name="Link_3_geom" type="mesh" mesh="Link_3_mesh" material="link_grey"
+                  group="0" contype="1" conaffinity="1" />
+
+            <!-- ====== Link_4 —— joint_4 (J4, 腕部旋转) ====== -->
+            <!-- origin: xyz=(0.3685 -1.185e-05 -0.114) rpy=(0 0 0), axis=Z, range=-1.48~4.62 rad -->
+            <body name="Link_4" pos="0.3685 -1.185e-05 -0.114" quat="1 0 0 0">
+              <inertial pos="-2.1345e-06 -0.0058004 0.0026717" mass="1.324856"
+                        fullinertia="2.208626e-03 1.246737e-03 2.139884e-03 2.706023e-08 -3.001177e-09 -1.992330e-05" />
+              <joint name="joint_4" type="hinge" pos="0 0 0" axis="0 0 1"
+                     range="-1.48 4.62" limited="true" damping="0.8" />
+              <geom name="Link_4_geom" type="mesh" mesh="Link_4_mesh" material="link_grey"
+                    group="0" contype="1" conaffinity="1" />
+
+              <!-- ====== Link_5 —— joint_5 (J5, 腕部弯曲) ====== -->
+              <!-- origin: xyz=(0 -0.1135 0) rpy=(1.5708 0 0), axis=Z, range=±6.28 rad -->
+              <!-- rpy=(π/2,0,0) → quat=(0.7071, 0.7071, 0, 0) -->
+              <body name="Link_5" pos="0 -0.1135 0" quat="0.7071 0.7071 0 0">
+                <inertial pos="-2.0304e-06 -0.0028889 -0.0023424" mass="1.511302"
+                          fullinertia="3.100199e-03 1.394743e-03 3.030287e-03 -2.568347e-08 1.397249e-09 1.083888e-05" />
+                <joint name="joint_5" type="hinge" pos="0 0 0" axis="0 0 1"
+                       range="-6.28 6.28" limited="true" damping="0.6" />
+                <geom name="Link_5_geom" type="mesh" mesh="Link_5_mesh" material="link_grey"
+                      group="0" contype="1" conaffinity="1" />
+
+                <!-- ====== Link_6 —— joint_6 (J6, 末端旋转) ====== -->
+                <!-- origin: xyz=(0 0.107 0) rpy=(-1.5708 0 0), axis=Z, range=±6.28 rad -->
+                <!-- rpy=(-π/2,0,0) → quat=(cos(-π/4), sin(-π/4), 0, 0)=(0.7071, -0.7071, 0, 0) -->
+                <body name="Link_6" pos="0 0.107 0" quat="0.7071 -0.7071 0 0">
+                  <inertial pos="2.7652e-05 -1.3485e-05 -0.021245" mass="0.338080"
+                            fullinertia="1.714451e-04 1.726906e-04 2.705068e-04 -1.664940e-07 -1.521825e-07 1.982142e-07" />
+                  <joint name="joint_6" type="hinge" pos="0 0 0" axis="0 0 1"
+                         range="-6.28 6.28" limited="true" damping="0.4" />
+                  <geom name="Link_6_geom" type="mesh" mesh="Link_6_mesh" material="link_grey"
+                        group="0" contype="1" conaffinity="1" />
+
+                  <!-- 末端参考点 (TCP) -->
+                  <site name="tcp" pos="0 0 -0.05" size="0.01" rgba="1 0 0 0.8" />
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <!-- ============================================================ -->
+  <!-- 碰撞排除: 相邻连杆 mesh 在关节处有几何重叠                    -->
+  <!-- 不排除会导致接触约束力完全抵消驱动力矩 (joint_1 锁死)         -->
+  <!-- ============================================================ -->
+  <contact>
+    <exclude body1="Link_0" body2="Link_1" />
+    <exclude body1="Link_1" body2="Link_2" />
+    <exclude body1="Link_2" body2="Link_3" />
+    <exclude body1="Link_3" body2="Link_4" />
+    <exclude body1="Link_4" body2="Link_5" />
+    <exclude body1="Link_5" body2="Link_6" />
+  </contact>
+
+  <!-- ============================================================ -->
+  <!-- 执行器: 6 个关节 position (位置控制)                         -->
+  <!-- ctrlrange = 关节位置范围 (rad), ctrl 即目标位置              -->
+  <!-- forcerange = 关节额定力矩 (N·m), 限制最大输出力矩            -->
+  <!--   J1/J4: ±200 N·m, J2/J3: ±300 N·m, J5: ±100 N·m, J6: ±50   -->
+  <!-- kp = 位置增益, kv = 速度阻尼增益 (含临界阻尼补偿)            -->
+  <!--   kv = 2*sqrt(kp*M) - joint.damping, M 为零位等效惯量        -->
+  <!--   J1: M=4.96, J2: M=4.70, J3: M=0.72,                        -->
+  <!--   J4: M=0.037, J5: M=0.016, J6: M=0.010 (kg·m²)             -->
+  <!-- ============================================================ -->
+  <actuator>
+    <position name="joint_1_motor" joint="joint_1"
+              ctrlrange="-6.28 6.28" ctrllimited="true"
+              kp="500" kv="98"
+              forcerange="-200 200" forcelimited="true" />
+    <position name="joint_2_motor" joint="joint_2"
+              ctrlrange="-1.48 4.62" ctrllimited="true"
+              kp="500" kv="93"
+              forcerange="-300 300" forcelimited="true" />
+    <position name="joint_3_motor" joint="joint_3"
+              ctrlrange="-3.05 3.05" ctrllimited="true"
+              kp="100" kv="16"
+              forcerange="-300 300" forcelimited="true" />
+    <position name="joint_4_motor" joint="joint_4"
+              ctrlrange="-1.48 4.62" ctrllimited="true"
+              kp="50" kv="2"
+              forcerange="-200 200" forcelimited="true" />
+    <position name="joint_5_motor" joint="joint_5"
+              ctrlrange="-6.28 6.28" ctrllimited="true"
+              kp="30" kv="1"
+              forcerange="-100 100" forcelimited="true" />
+    <position name="joint_6_motor" joint="joint_6"
+              ctrlrange="-6.28 6.28" ctrllimited="true"
+              kp="20" kv="1"
+              forcerange="-50 50" forcelimited="true" />
+  </actuator>
+
+  <!-- ============================================================ -->
+  <!-- 传感器                                                        -->
+  <!-- ============================================================ -->
+  <sensor>
+    <!-- 关节位置与速度 -->
+    <jointpos name="joint_1_pos" joint="joint_1" />
+    <jointpos name="joint_2_pos" joint="joint_2" />
+    <jointpos name="joint_3_pos" joint="joint_3" />
+    <jointpos name="joint_4_pos" joint="joint_4" />
+    <jointpos name="joint_5_pos" joint="joint_5" />
+    <jointpos name="joint_6_pos" joint="joint_6" />
+    <jointvel name="joint_1_vel" joint="joint_1" />
+    <jointvel name="joint_2_vel" joint="joint_2" />
+    <jointvel name="joint_3_vel" joint="joint_3" />
+    <jointvel name="joint_4_vel" joint="joint_4" />
+    <jointvel name="joint_5_vel" joint="joint_5" />
+    <jointvel name="joint_6_vel" joint="joint_6" />
+
+    <!-- 末端位姿跟踪 -->
+    <framepos name="tcp_pos" objtype="site" objname="tcp" />
+    <framequat name="tcp_quat" objtype="site" objname="tcp" />
+    <framelinvel name="tcp_vel" objtype="site" objname="tcp" />
+  </sensor>
+
+  <!-- ============================================================ -->
+  <!-- 初始关键帧                                                    -->
+  <!-- 零位: 所有关节角度 = 0                                        -->
+  <!-- ============================================================ -->
+  <keyframe>
+    <key name="zero" qpos="0 0 0 0 0 0" />
+    <key name="ready" qpos="0 0.5 -1.0 0 0.5 0" />
+  </keyframe>
+</mujoco>
